@@ -1,6 +1,6 @@
 public class Vec3 {
     public double[] vec = new double[3];
-    public double magnitude;
+    private double magnitude;
 
     public Vec3(){
         vec[0] = 0;

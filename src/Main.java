@@ -1,16 +1,20 @@
 void main() {
 
+    ObjectList world = new ObjectList();
+    world.add(new Sphere(0, 0, -1, 0.5, new Vec3(1,0,0)));
+    world.add(new Sphere(0, -100.5, -1, 100, new Vec3(0, 1, 0)));
+
     double aspectRatio = (double)16/9;
     int imageWidth = 400;
 
     //int imageWidth = 256;
     //int imageHeight = 256;
 
-    int imageHeight = (int) Math.max((int) imageWidth/aspectRatio, 1);
+    int imageHeight = (int) Math.max((double)imageWidth/aspectRatio, 1);
 
     double focalLength = 1.0;
     double viewportHeight = 2.0;
-    double viewportWidth = viewportHeight * (double)(imageWidth/imageHeight);
+    double viewportWidth = viewportHeight *((double)imageWidth/imageHeight);
 
     Vec3 cameraOrigin = new Vec3(0, 0, 0);
 
@@ -45,7 +49,7 @@ void main() {
                 Vec3 rayDirection = VectorOperations.subtract(pixelCentre, cameraOrigin);
 
                 Ray r = new Ray(cameraOrigin, rayDirection);
-                Vec3 pixelColour = colourRay(r);
+                Vec3 pixelColour = colourRay(r, world);
 
 
                 //double r = (double) i / (imageWidth - 1);
@@ -65,8 +69,14 @@ void main() {
     }
 }
 
-Vec3 colourRay(Ray r){
-    Vec3 unit_direction = VectorOperations.scale((double)1/r.direction().magnitude, r.direction());
+Vec3 colourRay(Ray r, ObjectList world){
+    RayHit hitty = world.getHit(r, new Interval(0, Double.POSITIVE_INFINITY));
+    if(hitty.isValid()){
+        return VectorOperations.scale(0.5, VectorOperations.add(hitty.getNormal(), new Vec3(1, 1, 1)));
+    }
+
+
+    Vec3 unit_direction = VectorOperations.scale((double)1/r.direction().getMag(), r.direction());
     double a = 0.5*(unit_direction.y()+1.0);
     return VectorOperations.add(VectorOperations.scale((1.0-a), new Vec3(1.0, 1.0, 1.0)), VectorOperations.scale(a, new Vec3(0.5, 0.7, 1.0)));
 }
