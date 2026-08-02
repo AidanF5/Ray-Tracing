@@ -1,13 +1,27 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 void main() {
-    //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-    // to see how IntelliJ IDEA suggests fixing it.
-    IO.println(String.format("Hello and welcome!"));
 
-    for (int i = 1; i <= 5; i++) {
-        //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-        // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-        IO.println("i = " + i);
+    int imageWidth = 256;
+    int imageHeight = 256;
+
+    try (PrintWriter writer = new PrintWriter("image.ppm")) {
+        writer.print("P3\n" + imageWidth + " " + imageHeight + "\n255\n");
+
+        for (int j = 0; j < imageHeight; j++) {
+            for (int i = 0; i < imageWidth; i++) {
+                double r = (double) i / (imageWidth - 1);
+                double g = (double) j / (imageHeight - 1);
+                double b = 0.0;
+
+                int ir = (int) (255.999 * r);
+                int ig = (int) (255.999 * g);
+                int ib = (int) (255.999 * b);
+
+
+                writer.println(ir + " " + ig + " " + ib);
+            }
+        }
+    }
+    catch (IOException e) {
+        e.printStackTrace();
     }
 }
