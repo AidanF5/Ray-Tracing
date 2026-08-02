@@ -8,8 +8,8 @@ public class Ray {
         d = new Vec3();
     }
 
-    public Ray(Vec3 orign, Vec3 direction){
-        o = orign;
+    public Ray(Vec3 origin, Vec3 direction){
+        o = origin;
         d = direction;
     }
 
