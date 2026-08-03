@@ -5,17 +5,19 @@ public class RayHit {
     private Vec3 colour;
     private boolean valid;
     private boolean frontFace;
+    private Material mat;
 
     public RayHit(){
         valid = false;
     }
 
-    public RayHit(Vec3 p, Vec3 n, double t, Vec3 c){
+    public RayHit(Vec3 p, Vec3 n, double t, Vec3 c, Material m){
         point = p;
         normal = n;
         this.t = t;
         colour = c;
         valid = true;
+        mat = m;
     }
 
     public boolean isValid() {
@@ -37,6 +39,15 @@ public class RayHit {
     public Vec3 getPoint() {
         return point;
     }
+
+    public boolean getFrontFace(){
+        return frontFace;
+    }
+
+    public Material getMaterial(){
+        return mat;
+    }
+
     public void setFrontFace(Vec3 outwardNormal, Ray r){
         frontFace = VectorOperations.dot(r.direction(), outwardNormal) < 0;
         normal = frontFace ? outwardNormal : VectorOperations.negate(outwardNormal);

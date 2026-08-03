@@ -5,6 +5,7 @@ public class Camera {
     private double aspectRatio = 1.0;
     private int imageWidth = 100;
     private int samplesPerPixel = 100;
+    private int maxBounces = 100;
 
     private int imageHeight;
     private Vec3 cameraOrigin;
@@ -34,7 +35,7 @@ public class Camera {
                     Vec3 col = new Vec3(0, 0, 0);
                     for (int k = 0; k < samplesPerPixel; k++) {
                         Ray r = getRay(i, j);
-                        col = VectorOperations.add(col, colourRay(r, world));
+                        col = VectorOperations.add(col, colourRay(r, world, maxBounces));
                     }
 
                     // Output pixel color to file using the helper
@@ -76,10 +77,20 @@ public class Camera {
                         VectorOperations.add(pixelDeltaX, pixelDeltaY)));
 
     }
-    private Vec3 colourRay(Ray r, ObjectList world){
-        RayHit hitty = world.getHit(r, new Interval(0, Double.POSITIVE_INFINITY));
+    private Vec3 colourRay(Ray r, ObjectList world, int depth){
+        if(depth <=0){
+            return new Vec3(0, 0, 0);
+        }
+        RayHit hitty = world.getHit(r, new Interval(0.001, Double.POSITIVE_INFINITY));
         if(hitty.isValid()){
-            return VectorOperations.scale(0.5, VectorOperations.add(hitty.getNormal(), new Vec3(1, 1, 1)));
+            Ray scattered = new Ray();
+            Vec3 colour = new Vec3(0, 0, 0);
+            if(hitty.getMaterial().scatter(r, hitty, colour, scattered)){
+                return VectorOperations.multiplyComponents(colour, colourRay(scattered, world, depth-1));
+            }
+            //Vec3 direction = VectorOperations.add(hitty.getNormal(), Vec3.randomUnit());
+            //return VectorOperations.scale(0.5, colourRay(new Ray(hitty.getPoint(), direction), world, depth-1));
+            return new Vec3(0, 0, 0);
         }
 
 

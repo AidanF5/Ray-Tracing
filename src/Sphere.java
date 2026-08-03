@@ -2,11 +2,13 @@ public class Sphere extends Object{
 
     private Vec3 centre;
     private double radius;
+    private Material mat;
 
-    public Sphere(double x, double y, double z, double r, Vec3 c){
+    public Sphere(double x, double y, double z, double r, Vec3 c, Material m){
         centre = new Vec3(x, y, z);
         radius = r;
         colour = c;
+        mat = m;
     }
 
     @Override
@@ -30,7 +32,7 @@ public class Sphere extends Object{
         }
         Vec3 point = r.pointAt(root);
         Vec3 outwardNormal = VectorOperations.scale((double)1/radius,VectorOperations.subtract(point, centre));
-        RayHit hit = new RayHit(point, outwardNormal, root, colour);
+        RayHit hit = new RayHit(point, outwardNormal, root, colour, mat);
         hit.setFrontFace(outwardNormal, r);
         return hit;
     }

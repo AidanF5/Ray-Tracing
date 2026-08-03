@@ -24,4 +24,9 @@ public class Ray {
     public Vec3 pointAt(double factor){
         return VectorOperations.add(o, VectorOperations.scale(factor, d));
     }
+
+    public void copy(Ray r){
+        o = r.origin();
+        d = r.direction();
+    }
 }
