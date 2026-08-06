@@ -68,4 +68,14 @@ public class Vec3 {
         vec[1] = y;
         vec[2] = z;
     }
+
+    public static Vec3 randomUnitDisk(){
+        while(true){
+            Vec3 p = Vec3.random(-1, 1);
+            p.vec[2] = 0;
+            if(p.x()*p.x()+p.y()*p.y() < 1){
+                return p;
+            }
+        }
+    }
 }
