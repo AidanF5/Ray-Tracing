@@ -4,8 +4,8 @@ import java.io.PrintWriter;
 public class Camera {
     private double aspectRatio = 1.0;
     private int imageWidth = 100;
-    private int samplesPerPixel = 500;
-    private int maxBounces = 50;
+    private int samplesPerPixel = 50;
+    private int maxBounces = 20;
     private double vfov = 20;
     private Vec3 lookFrom = new Vec3(13, 2, 3);
     private Vec3 lookAt = new Vec3(0, 0, 0);
