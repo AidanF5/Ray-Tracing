@@ -10,11 +10,11 @@ public class VectorOperations {
     public static Vec3 subtract(Vec3 v1, Vec3 v2){
         return new Vec3(v1.x() - v2.x(), v1.y() - v2.y(), v1.z() - v2.z());
     }
-    public static Vec3 scale(double factor, Vec3 v){
+    public static Vec3 scale(float factor, Vec3 v){
         return new Vec3(v.x() * factor, v.y() * factor, v.z() * factor);
     }
 
-    public static double dot(Vec3 v1, Vec3 v2){
+    public static float dot(Vec3 v1, Vec3 v2){
         return (v1.x() * v2.x()) + (v1.y() * v2.y()) + (v1.z() * v2.z());
     }
 
@@ -40,11 +40,11 @@ public class VectorOperations {
         v.update(u.x(), u.y(), u.z());
     }
 
-    public static Vec3 refract(Vec3 v, Vec3 n, double refractiveRatio){
-        double cosTheta = Math.min(VectorOperations.dot(VectorOperations.negate(v), n), 1.0);
+    public static Vec3 refract(Vec3 v, Vec3 n, float refractiveRatio){
+        float cosTheta = (float)Math.min(VectorOperations.dot(VectorOperations.negate(v), n), 1.0);
         Vec3 orthogonal = VectorOperations.scale(refractiveRatio, VectorOperations.add(v, VectorOperations.scale(cosTheta, n)));
         Vec3 parallel = VectorOperations.scale(
-                -Math.sqrt(Math.abs(1.0 - (orthogonal.getMag()*orthogonal.getMag()))),
+                -(float)Math.sqrt(Math.abs(1.0 - (orthogonal.getMag()*orthogonal.getMag()))),
                 n
         );
         return VectorOperations.add(orthogonal, parallel);

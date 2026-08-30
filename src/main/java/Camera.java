@@ -2,23 +2,23 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 public class Camera {
-    private double aspectRatio = 1.0;
+    private float aspectRatio = 1.0f;
     private int imageWidth = 100;
-    private int samplesPerPixel = 50;
-    private int maxBounces = 20;
-    private double vfov = 20;
+    private int samplesPerPixel = 10;
+    private int maxBounces = 10;
+    private float vfov = 20;
     private Vec3 lookFrom = new Vec3(13, 2, 3);
     private Vec3 lookAt = new Vec3(0, 0, 0);
     private Vec3 vup = new Vec3(0, 1, 0);
-    private double defocusAngle = 0.6;
-    private double focusDist = 10.0;
+    private float defocusAngle = 0.6f;
+    private float focusDist = 10.0f;
 
     private int imageHeight;
     private Vec3 cameraOrigin;
     private Vec3 topLeftCentre;
     private Vec3 pixelDeltaX;
     private Vec3 pixelDeltaY;
-    private double pixelSamplesScales;
+    private float pixelSamplesScales;
     private Vec3 u, v, w;
     private Vec3 defocusDiskX;
     private Vec3 defocusDiskY;
@@ -27,7 +27,7 @@ public class Camera {
 
     }
 
-    public Camera(double aspectRatio, int imageWidth){
+    public Camera(float aspectRatio, int imageWidth){
         this.aspectRatio = aspectRatio;
         this.imageWidth = imageWidth;
     }
@@ -61,16 +61,16 @@ public class Camera {
 
     private void initialise(){
         imageHeight = (int) Math.max((double)imageWidth/aspectRatio, 1);
-        pixelSamplesScales = 1.0 / samplesPerPixel;
+        pixelSamplesScales = (float)(1.0 / samplesPerPixel);
 
         cameraOrigin = lookFrom;
 
         //double focalLength = VectorOperations.subtract(lookFrom, lookAt).getMag();
-        double theta = Math.toRadians(vfov);
-        double h = Math.tan(theta/2);
+        float theta = (float)Math.toRadians(vfov);
+        float h = (float)Math.tan(theta/2);
         //double viewportHeight = 2 * h * focalLength;
-        double viewportHeight = 2 * h * focusDist;
-        double viewportWidth = viewportHeight *((double)imageWidth/imageHeight);
+        float viewportHeight = 2 * h * focusDist;
+        float viewportWidth = viewportHeight *((float)imageWidth/imageHeight);
 
         w = VectorOperations.normalise(VectorOperations.subtract(lookFrom, lookAt));
         u = VectorOperations.normalise(VectorOperations.cross(vup, w));
@@ -79,20 +79,20 @@ public class Camera {
         Vec3 viewportX = VectorOperations.scale(viewportWidth, u);
         Vec3 viewportY = VectorOperations.scale(viewportHeight, VectorOperations.negate(v));
 
-        pixelDeltaX = VectorOperations.scale((double) 1 /imageWidth, viewportX);
-        pixelDeltaY = VectorOperations.scale((double) 1/imageHeight, viewportY);
+        pixelDeltaX = VectorOperations.scale((float) 1 /imageWidth, viewportX);
+        pixelDeltaY = VectorOperations.scale((float) 1/imageHeight, viewportY);
 
         Vec3 topLeftPixel =
                 VectorOperations.subtract(VectorOperations.subtract(cameraOrigin, VectorOperations.scale(focusDist, w)),
                         VectorOperations.add(
-                                VectorOperations.scale(0.5, viewportX),
-                                VectorOperations.scale(0.5, viewportY)));
+                                VectorOperations.scale(0.5f, viewportX),
+                                VectorOperations.scale(0.5f, viewportY)));
 
         topLeftCentre = VectorOperations.add(topLeftPixel,
-                VectorOperations.scale(0.5,
+                VectorOperations.scale(0.5f,
                         VectorOperations.add(pixelDeltaX, pixelDeltaY)));
 
-        double defocusRadius = focusDist * Math.tan(Math.toRadians(defocusAngle/2.0));
+        float defocusRadius = focusDist * (float) Math.tan(Math.toRadians(defocusAngle/2.0));
         defocusDiskX = VectorOperations.scale(defocusRadius, u);
         defocusDiskY = VectorOperations.scale(defocusRadius, v);
 
@@ -115,16 +115,16 @@ public class Camera {
         }
 
 
-        Vec3 unit_direction = VectorOperations.scale((double)1/r.direction().getMag(), r.direction());
-        double a = 0.5*(unit_direction.y()+1.0);
-        return VectorOperations.add(VectorOperations.scale((1.0-a), new Vec3(1.0, 1.0, 1.0)), VectorOperations.scale(a, new Vec3(0.5, 0.7, 1.0)));
+        Vec3 unit_direction = VectorOperations.scale((float)1/r.direction().getMag(), r.direction());
+        float a = (float)(0.5*(unit_direction.y()+1.0));
+        return VectorOperations.add(VectorOperations.scale((1.0f-a), new Vec3(1.0f, 1.0f, 1.0f)), VectorOperations.scale(a, new Vec3(0.5f, 0.7f, 1.0f)));
     }
 
     private Ray getRay(int i, int j){
         Vec3 offset = sampleSquare();
         Vec3 xOffset = VectorOperations.scale(i+offset.x(), pixelDeltaX);
         Vec3 yOffset = VectorOperations.scale(j+ offset.y(), pixelDeltaY);
-        Vec3 pixelCentre =VectorOperations.add(VectorOperations.add(topLeftCentre, xOffset), yOffset);
+        Vec3 pixelCentre = VectorOperations.add(VectorOperations.add(topLeftCentre, xOffset), yOffset);
         Vec3 rayOrigin = (defocusAngle <= 0) ? cameraOrigin : defocusDiskSample();
         Vec3 rayDirection = VectorOperations.subtract(pixelCentre, rayOrigin);
 
@@ -132,7 +132,7 @@ public class Camera {
         return r;
     }
     private Vec3 sampleSquare(){
-        return new Vec3(Math.random() - 0.5, Math.random() - 0.5, 0);
+        return new Vec3((float)(Math.random() - 0.5),(float)(Math.random() - 0.5), 0);
     }
 
     private Vec3 defocusDiskSample(){
