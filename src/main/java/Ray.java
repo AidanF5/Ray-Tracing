@@ -21,7 +21,7 @@ public class Ray {
         return d;
     }
 
-    public Vec3 pointAt(double factor){
+    public Vec3 pointAt(float factor){
         return VectorOperations.add(o, VectorOperations.scale(factor, d));
     }
 

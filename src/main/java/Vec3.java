@@ -1,6 +1,6 @@
 public class Vec3 {
-    public double[] vec = new double[3];
-    private double magnitude;
+    public float[] vec = new float[3];
+    private float magnitude;
 
     public Vec3(){
         vec[0] = 0;
@@ -9,45 +9,45 @@ public class Vec3 {
         magnitude = 0;
     }
 
-    public Vec3(double e0, double e1, double e2){
+    public Vec3(float e0, float e1, float e2){
         vec[0] = e0;
         vec[1] = e1;
         vec[2] = e2;
         magnitude = calculate_magnitude();
     }
 
-    public double x(){
+    public float x(){
         return vec[0];
     }
 
-    public double y(){
+    public float y(){
         return vec[1];
     }
 
-    public double z(){
+    public float z(){
         return vec[2];
     }
 
-    public double getMag(){
+    public float getMag(){
         return magnitude;
     }
 
-    private double calculate_magnitude(){
-        return Math.sqrt(vec[0]* vec[0] + vec[1]* vec[1] + vec[2]* vec[2]);
+    private float calculate_magnitude(){
+        return (float)Math.sqrt(vec[0]* vec[0] + vec[1]* vec[1] + vec[2]* vec[2]);
     }
 
     public static Vec3 random(){
-        return new Vec3(Math.random(), Math.random(), Math.random());
+        return new Vec3((float)Math.random(), (float)Math.random(), (float)Math.random());
     }
     public static Vec3 random(double min, double max){
-        return new Vec3((min + (max-min)*Math.random()), (min + (max-min)*Math.random()), (min + (max-min)*Math.random()));
+        return new Vec3((float)(min + (max-min)*Math.random()), (float)(min + (max-min)*Math.random()), (float)(min + (max-min)*Math.random()));
     }
     public static Vec3 randomUnit(){
         while(true){
             Vec3 p = random(-1, 1);
             double lensq = p.getMag()*p.getMag();
             if (1e-160 < lensq && lensq <= 1.0) {
-                return VectorOperations.scale((double)1/p.getMag(), p); // Normalize to surface
+                return VectorOperations.scale((float)1/p.getMag(), p); // Normalize to surface
             }
         }
     }
@@ -60,10 +60,10 @@ public class Vec3 {
     }
 
     public boolean nearZero(){
-        double s = 1e-8;
+        float s = (float)1e-8;
         return (Math.abs(vec[0])<s) && (Math.abs(vec[1])<s) && (Math.abs(vec[2])<s);
     }
-    public void update(double x, double y, double z){
+    public void update(float x, float y, float z){
         vec[0] = x;
         vec[1] = y;
         vec[2] = z;

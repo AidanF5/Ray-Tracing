@@ -1,7 +1,7 @@
 public class RayHit {
     private Vec3 point;
     private Vec3 normal;
-    private double t;
+    private float t;
     private Vec3 colour;
     private boolean valid;
     private boolean frontFace;
@@ -11,7 +11,7 @@ public class RayHit {
         valid = false;
     }
 
-    public RayHit(Vec3 p, Vec3 n, double t, Vec3 c, Material m){
+    public RayHit(Vec3 p, Vec3 n, float t, Vec3 c, Material m){
         point = p;
         normal = n;
         this.t = t;
@@ -24,7 +24,7 @@ public class RayHit {
         return valid;
     }
 
-    public double getT() {
+    public float getT() {
         return t;
     }
 

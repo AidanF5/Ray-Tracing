@@ -1,7 +1,7 @@
 public class Metal extends Material {
 
-    private double fuzz;
-    public Metal(double fuzz){
+    private float fuzz;
+    public Metal(float fuzz){
         this.fuzz = fuzz < 1 ? fuzz : 1;
         this.fuzz = Math.abs(this.fuzz);
     }

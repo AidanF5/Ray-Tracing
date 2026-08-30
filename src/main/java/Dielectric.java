@@ -1,14 +1,14 @@
 public class Dielectric extends Material{
 
-    private double refractiveIndex;
+    private float refractiveIndex;
 
-    public Dielectric(double index){
+    public Dielectric(float index){
         refractiveIndex = index;
     }
 
     public boolean scatter(Ray r, RayHit hitty, Vec3 colour, Ray scattered){
         VectorOperations.copy(hitty.getColour(), colour);
-        double ri = hitty.getFrontFace() ? (1.0/refractiveIndex) : refractiveIndex;
+        float ri = (float)(hitty.getFrontFace() ? (1.0/refractiveIndex) : refractiveIndex);
         Vec3 unitDirection = VectorOperations.normalise(r.direction());
 
         double cosTheta = Math.min(VectorOperations.dot(VectorOperations.negate(unitDirection), hitty.getNormal()), 1.0);

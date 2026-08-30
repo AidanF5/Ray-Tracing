@@ -1,0 +1,230 @@
+#version 430
+layout(local_size_x = 16, local_size_y=16) in;
+layout(rgba32f, binding = 0) uniform image2D imgOutput;
+
+uniform int u_Samples;
+uniform vec3 u_CamPos;
+uniform vec3 u_CamFor;
+uniform vec3 u_CamUp;
+uniform vec3 u_CamRight;
+uniform float u_Fov;
+
+#define TYPE_SPHERE             0
+
+#define MATERIAL_LAMBERTIAN     0
+#define MATERIAL_METAL          1
+#define MATERIAL_DIELECTRIC     2
+
+struct Ray{
+    vec3 o;
+    vec3 d;
+};
+
+struct Object{
+    int type;
+    int material;
+    float matParam1;
+    float matParam2;
+    vec3 colour;
+    float matParam3;
+    vec3 pos;
+    float matParam4;
+    vec3 normal;
+    float matParam5;
+    float radius;
+    float height;
+    float matParam6;
+    float additionalParam;
+};
+
+struct RayHit{
+    vec3 point;
+    vec3 normal;
+    float t;
+    vec3 colour;
+    bool valid;
+    bool frontFace;
+    Object o;
+};
+
+
+layout(std430, binding = 1) buffer SceneData{
+    Object objects[];
+};
+
+uint pcgHash(inout uint state) {
+    state = state * 747796405u + 2891336453u;
+    uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+    return (word >> 22u) ^ word;
+}
+
+float randomFloat(inout uint state) {
+    return float(pcgHash(state)) / 4294967295.0;
+}
+
+vec3 randomInUnitSphere(inout uint state) {
+    float z = randomFloat(state) * 2.0 - 1.0;
+    float a = randomFloat(state) * 6.28318530718;
+    float r = sqrt(1.0 - z * z);
+    return vec3(r * cos(a), r * sin(a), z);
+}
+
+RayHit hitSphere(Object s, Ray r, float tMin, float tMax){
+    RayHit hit;
+    vec3 oc = s.pos - r.o;
+    float a = dot(r.d, r.d);
+    float h = dot(r.d, oc);
+    float c = dot(oc, oc) - (s.radius * s.radius);
+
+    float discrim = h*h - a*c;
+    if(discrim < 0){
+        hit.valid = false;
+        return hit;
+    }
+    float sqrtd = sqrt(discrim);
+    float root = (h - sqrtd) / a;
+
+    if(root < tMin || root > tMax){
+        root = (h + sqrtd) / a;
+        if (root < tMin || root > tMax){
+            hit.valid = false;
+            return hit;
+        }
+    }
+    hit.t = root;
+    hit.point = r.o + hit.t * r.d;
+    vec3 outwardsNormal = (hit.point - s.pos) / s.radius;
+    hit.frontFace = dot(r.d, outwardsNormal) < 0.0;
+    hit.normal = hit.frontFace ? outwardsNormal : -outwardsNormal;
+    hit.o = s;
+    hit.colour = s.colour;
+    hit.valid = true;
+    return hit;
+}
+
+RayHit rayIntersect(Ray r, float tMin, float tMax){
+    RayHit closestHit;
+    closestHit.valid = false;
+    for (int i = 0; i < objects.length(); i++){
+        RayHit next;
+        switch (objects[i].type){
+            case TYPE_SPHERE:
+                next = hitSphere(objects[i], r, tMin, tMax);
+                break;
+        }
+        if(!closestHit.valid){
+            closestHit = next;
+            if(next.valid){
+                tMax = next.t;
+            }
+        }
+        else if(!next.valid){
+
+        }
+        else if(closestHit.t > next.t){
+            closestHit = next;
+            tMax = closestHit.t;
+        }
+    }
+    return closestHit;
+}
+
+float reflectance(float cosine, float refIdx){
+    float r0 = (1.0 - refIdx) / (1.0 + refIdx);
+    r0 = r0 * r0;
+    return r0 + (1.0 - r0) * pow((1.0 - cosine), 5.0);
+}
+
+bool scatter(Ray r, RayHit hit, out vec3 colour, out Ray scattered, inout uint rngState){
+    if(hit.o.material == MATERIAL_LAMBERTIAN){
+        vec3 scatteredDirection = hit.normal + normalize(randomInUnitSphere(rngState));
+        if(length(scatteredDirection) < 0.00001){
+            scatteredDirection = hit.normal;
+        }
+        scattered = Ray(hit.point, normalize(scatteredDirection));
+        colour = hit.colour;
+        return true;
+    }
+    else if(hit.o.material == MATERIAL_METAL){
+        vec3 reflected = normalize(reflect(r.d, hit.normal));
+        scattered = Ray(hit.point, normalize(reflected + hit.o.matParam1 * randomInUnitSphere(rngState)));
+        colour = hit.colour;
+        return dot(scattered.d, hit.normal) > 0.0;
+    }
+    else if(hit.o.material == MATERIAL_DIELECTRIC){
+        colour = hit.colour;
+        float ri = hit.frontFace ? (1.0/hit.o.matParam1): hit.o.matParam1;
+        vec3 unitD = normalize(r.d);
+
+        float cosTheta = min(dot(-unitD, hit.normal), 1.0);
+        float sinTheta = sqrt(1.0 - (cosTheta * cosTheta));
+
+        bool cannotRefract = ri * sinTheta > 1.0;
+        vec3 direction;
+
+        if(cannotRefract || reflectance(cosTheta, ri) > randomFloat(rngState)){
+            direction = reflect(unitD, hit.normal);
+        }
+        else{
+            direction = refract(unitD, hit.normal, ri);
+        }
+        scattered = Ray(hit.point, direction);
+        return true;
+    }
+    return false;
+}
+
+vec3 rayColour(Ray r, inout uint rngState){
+    vec3 throughput = vec3(1.0);
+
+    for (int bounce = 0; bounce < 10; bounce++){
+        RayHit hit = rayIntersect(r, 0.0001, 10000.0);
+        if(hit.valid){
+            Ray scattered;
+            vec3 colour;
+            if(scatter(r, hit, colour, scattered, rngState)){
+                throughput *= colour;
+                r = scattered;
+            }
+            else{
+                return vec3(0.0);
+            }
+        }
+        else{
+            vec3 unitD = normalize(r.d);
+            float a = 0.5 * (unitD.y + 1.0);
+            vec3 skyColour = (1.0 - a) * vec3(1.0) + a * vec3(0.5, 0.7, 1.0);
+            return throughput * skyColour;
+        }
+    }
+    return vec3(0.0);
+}
+
+void main(){
+    ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 dims = imageSize(imgOutput);
+
+    if(pixelCoords.x >= dims.x || pixelCoords.y >= dims.y){
+        return;
+    }
+
+    uint rngState = uint(pixelCoords.x * 1973 + pixelCoords.y * 9277);
+
+    float halfFov = tan(radians(u_Fov) * 0.5);
+    vec3 accumulatedColour = vec3(0.0);
+
+    for (int s = 0; s < u_Samples; s++){
+        vec2 offset = vec2(randomFloat(rngState), randomFloat(rngState)) - 0.5;
+        vec2 uv = ((vec2(pixelCoords) + offset) / vec2(dims)) * 2.0 - 1.0;
+        uv.x *= float(dims.x)/float(dims.y);
+
+        vec3 rd = normalize(u_CamFor + (uv.x * halfFov * u_CamRight) + (uv.y * halfFov * u_CamUp));
+        Ray r = Ray(u_CamPos, rd);
+
+        accumulatedColour += rayColour(r, rngState);
+    }
+
+    vec3 finalColour = accumulatedColour / float(u_Samples);
+    imageStore(imgOutput, pixelCoords, vec4(finalColour, 1.0));
+}
+

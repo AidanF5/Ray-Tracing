@@ -4,7 +4,7 @@ public class Sphere extends Object{
     private double radius;
     private Material mat;
 
-    public Sphere(double x, double y, double z, double r, Vec3 c, Material m){
+    public Sphere(float x, float y, float z, double r, Vec3 c, Material m){
         centre = new Vec3(x, y, z);
         radius = r;
         colour = c;
@@ -24,14 +24,14 @@ public class Sphere extends Object{
         }
         double sqrtDiscrim = Math.sqrt(discrim);
 
-        double root = (h - sqrtDiscrim) / a;
+        float root = (float)((h - sqrtDiscrim) / a);
         if (!interval.surrounds(root)) {
-            root = (h + sqrtDiscrim) / a;
+            root = (float)((h + sqrtDiscrim) / a);
             if (!interval.surrounds(root))
                 return new RayHit();
         }
         Vec3 point = r.pointAt(root);
-        Vec3 outwardNormal = VectorOperations.scale((double)1/radius,VectorOperations.subtract(point, centre));
+        Vec3 outwardNormal = VectorOperations.scale((float)(1/radius),VectorOperations.subtract(point, centre));
         RayHit hit = new RayHit(point, outwardNormal, root, colour, mat);
         hit.setFrontFace(outwardNormal, r);
         return hit;
