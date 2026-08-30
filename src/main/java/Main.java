@@ -18,7 +18,7 @@ import java.io.File;
 public class Main {
     private static final int WIDTH = 1920;
     private static final int HEIGHT = 1080;
-    private static final int SAMPLES_PER_PIXEL = 256;
+    private static final int SAMPLES_PER_PIXEL = 10;
 
     private static final Vec3 camPos = new Vec3(0.0f, 0.0f, 1.5f);
     private static final Vec3 camFor = VectorOperations.normalise(new Vec3(0.0f, 0.0f, -1.0f));
@@ -47,69 +47,11 @@ public class Main {
         GL43.glTexStorage2D(GL43.GL_TEXTURE_2D, 1, GL43.GL_RGBA32F, WIDTH, HEIGHT);
 
         //Get the scene data
-        int numObjects = 7;
+        int numObjects = 488;
         ByteBuffer buffer = MemoryUtil.memAlloc(numObjects * 80);  //int and floats are 4 bytes
 
-        /*addObject(buffer, 0, 0, 0.0f, 0.0f,
-                1.0f, 0.1f,  0.5f,  0.0f,
-                0.0f, 0.0f, -1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 0.0f,
-                0.5f, 0.0f, 0.0f, 0.0f);
-        */
-        // 1. Ground Plane (Type: 1=Plane, Material: 0=Lambertian, Color: Checker Gray)
-        addObject(buffer,
-                0, 0, 0.0f, 0.0f,               // Type=1 (Plane), Mat=0 (Lambertian)
-                0.4f, 0.4f, 0.4f, 0.0f,         // Gray Albedo
-                0.0f, -0.5f, 0.0f, 0.0f,        // Plane Point: Y = -0.5
-                0.0f, 1.0f, 0.0f, 0.0f,         // Normal: Facing straight UP (0, 1, 0)
-                0.0f, 0.0f, 0.0f, 0.0f);        // Radius/Height unused
+        createScene(buffer);
 
-        // 2. Center Glass Sphere (Type: 0=Sphere, Material: 2=Dielectric, IOR: 1.5)
-        addObject(buffer,
-                0, 2, 1.5f, 0.0f,               // Type=0 (Sphere), Mat=2 (Dielectric), IOR=1.5
-                1.0f, 1.0f, 1.0f, 0.0f,         // Pure White (Transparent)
-                0.0f, 0.0f, -1.2f, 0.0f,        // Center: (0, 0, -1.2)
-                0.0f, 0.0f, 0.0f, 0.0f,         // Normal unused
-                0.5f, 0.0f, 0.0f, 0.0f);        // Radius = 0.5
-
-        // 3. Left Diffuse Sphere (Type: 0=Sphere, Material: 0=Lambertian, Color: Red/Orange)
-        addObject(buffer,
-                0, 0, 0.0f, 0.0f,               // Type=0 (Sphere), Mat=0 (Lambertian)
-                0.9f, 0.2f, 0.1f, 0.0f,         // Warm Red Albedo
-                -1.2f, 0.0f, -1.0f, 0.0f,       // Center: (-1.2, 0, -1.0)
-                0.0f, 0.0f, 0.0f, 0.0f,         // Normal unused
-                0.5f, 0.0f, 0.0f, 0.0f);        // Radius = 0.5
-
-        // 4. Right Polished Metal Sphere (Type: 0=Sphere, Material: 1=Metal, Fuzz: 0.05)
-        addObject(buffer,
-                0, 1, 0.05f, 0.0f,              // Type=0 (Sphere), Mat=1 (Metal), Fuzziness=0.05 (Smooth mirror)
-                0.8f, 0.85f, 0.88f, 0.0f,       // Silver Chrome Albedo
-                1.2f, 0.0f, -1.0f, 0.0f,        // Center: (1.2, 0, -1.0)
-                0.0f, 0.0f, 0.0f, 0.0f,         // Normal unused
-                0.5f, 0.0f, 0.0f, 0.0f);        // Radius = 0.5
-
-        // 5. Back Metal Cylinder (Type: 2=Cylinder, Material: 1=Metal, Fuzz: 0.1)
-        addObject(buffer,
-                0, 1, 0.1f, 0.0f,               // Type=2 (Cylinder), Mat=1 (Metal), Fuzziness=0.1
-                0.9f, 0.75f, 0.3f, 0.0f,        // Gold Metal Albedo
-                -0.6f, -0.5f, -2.0f, 0.0f,      // Base Center: (-0.6, -0.5, -2.0)
-                0.0f, 1.0f, 0.0f, 0.0f,         // Axis vector: Pointing UP along Y
-                0.35f, 1.5f, 0.0f, 0.0f);       // Radius = 0.35, Height = 1.5
-
-        // 6. Small Emerald Glass Bubble (Type: 0=Sphere, Material: 2=Dielectric, IOR: 1.5)
-        addObject(buffer,
-                0, 2, 1.5f, 0.0f,               // Type=0 (Sphere), Mat=2 (Dielectric)
-                0.1f, 0.9f, 0.3f, 0.0f,         // Tinted Emerald Green
-                0.5f, -0.25f, -0.6f, 0.0f,      // Positioned close to camera
-                0.0f, 0.0f, 0.0f, 0.0f,
-                0.25f, 0.0f, 0.0f, 0.0f);       // Radius = 0.25
-
-        // Ground Sphere (Radius = 100, positioned far down at Y = -100.5)
-        addObject(buffer, 0, 0, 0.0f, 0.0f,
-                0.5f, 0.5f, 0.5f, 0.0f,     // Gray color
-                0.0f, -100.5f, -1.0f, 0.0f, // Position
-                0.0f, 0.0f, 0.0f, 0.0f,
-                100.0f, 0.0f, 0.0f, 0.0f);  // Radius = 100
         buffer.flip();
 
         int ssbo = GL43.glGenBuffers();
@@ -156,12 +98,13 @@ public class Main {
         GL43.glMemoryBarrier(GL43.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         GL43.glFinish();
 
-        long duration = System.currentTimeMillis() - startTime;
-        System.out.println("Completed in " + (duration) + " milliseconds");
 
         //Move image from GPU to PNG
         saveTexturePNG(outputTexture, WIDTH, HEIGHT, "renderImage.png");
         System.out.println("Render saved to png file");
+
+        long duration = System.currentTimeMillis() - startTime;
+        System.out.println("Completed in " + (duration) + " milliseconds");
 
         //GL Cleanup
         GL43.glDeleteTextures(outputTexture);
@@ -207,5 +150,69 @@ public class Main {
             e.printStackTrace();
         }
     }
-    
+    private static void createScene(ByteBuffer buf){
+
+        addObject(buf, 0, 0, 0, 0,
+                0.5f, 0.5f, 0.5f, 0,
+                0, -1000, 0, 0,
+                0, 0, 0, 0,
+                1000, 0, 0, 0);
+
+        for (int a = -11; a < 11; a++){
+            for (int b = -11; b < 11; b++){
+                double chooseMat = Math.random();
+                float x = a+0.9f * (float)Math.random();
+                float y = 0.2f;
+                float z = b + 0.9f * (float)Math.random();
+
+                if((x-4)*(x-4)+(z*z) > 0.81){
+                    Vec3 colour;
+                    float matParam1 = 0.0f;
+                    int material;
+                    if(chooseMat < 0.8){
+                        colour = VectorOperations.multiplyComponents(Vec3.random(), Vec3.random());
+                        material = 0;
+                    }
+                    else if(chooseMat < 0.95){
+                        colour = Vec3.random(0.5, 1.0);
+                        matParam1 = (float) (Math.random()/2);
+                        material = 1;
+                    }
+                    else{
+                        matParam1 = 1.5f;
+                        colour = new Vec3(1.0f, 1.0f, 1.0f);
+                        material = 2;
+                    }
+                    addObject(buf, 0, material, matParam1, 0.0f,
+                            colour.x(), colour.y(), colour.z(), 0 ,
+                            x, y, z, 0,
+                            0, 0, 0, 0,
+                            0.2f, 0, 0, 0);
+
+                }
+                else{
+                    b--;
+                }
+            }
+        }
+        addObject(buf, 0, 2, 1.5f, 0,
+                1, 1, 1, 0,
+                0, 1, 0, 0,
+                0, 0, 0, 0,
+                1, 0, 0, 0);
+
+        addObject(buf, 0, 0, 0, 0,
+                0.4f, 0.2f, 0.1f, 0,
+                -4, 1, 0, 0,
+                0, 0, 0, 0,
+                1, 0, 0, 0);
+
+        addObject(buf, 0, 1, 0, 0,
+                0.7f, 0.6f, 0.5f, 0,
+                4, 1, 0, 0,
+                0, 0, 0, 0,
+                1, 0, 0, 0);
+
+
+    }
 }

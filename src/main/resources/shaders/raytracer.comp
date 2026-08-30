@@ -177,7 +177,7 @@ bool scatter(Ray r, RayHit hit, out vec3 colour, out Ray scattered, inout uint r
 vec3 rayColour(Ray r, inout uint rngState){
     vec3 throughput = vec3(1.0);
 
-    for (int bounce = 0; bounce < 16; bounce++){
+    for (int bounce = 0; bounce < 10; bounce++){
         RayHit hit = rayIntersect(r, 0.0001, 10000.0);
         if(hit.valid){
             Ray scattered;

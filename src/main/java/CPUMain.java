@@ -13,24 +13,29 @@ public class CPUMain {
 
                 if (VectorOperations.subtract(centre, new Vec3(4, 0.2f, 0)).getMag() > 0.9) {
                     Material sphereMaterial;
-                    Vec3 sphereColor;
+                    Vec3 colour;
 
                     if (chooseMat < 0.8) {
-                        sphereColor = VectorOperations.multiplyComponents(Vec3.random(), Vec3.random());
-                        world.add(new Sphere(centre.x(), centre.y(), centre.z(), 0.2, sphereColor, l));
+                        colour = VectorOperations.multiplyComponents(Vec3.random(), Vec3.random());
+                        world.add(new Sphere(centre.x(), centre.y(), centre.z(), 0.2, colour, l));
 
-                    } else if (chooseMat < 0.95) {
+                    }
+                    else if (chooseMat < 0.95) {
                         Vec3 albedo = Vec3.random(0.5, 1.0);
                         float fuzz = (float) (Math.random() / 2.0);
                         sphereMaterial = new Metal(fuzz);
                         world.add(new Sphere(centre.x(), centre.y(), centre.z(), 0.2, albedo, sphereMaterial));
 
-                    } else {
-                        sphereMaterial = new Dielectric(1.5f);
-                        sphereColor = new Vec3(1.0f, 1.0f, 1.0f);
-                        //Basic white colour
-                        world.add(new Sphere(centre.x(), centre.y(), centre.z(), 0.2, sphereColor, sphereMaterial));
                     }
+                    else {
+                        sphereMaterial = new Dielectric(1.5f);
+                        colour = new Vec3(1.0f, 1.0f, 1.0f);
+                        //Basic white colour
+                        world.add(new Sphere(centre.x(), centre.y(), centre.z(), 0.2, colour, sphereMaterial));
+                    }
+                }
+                else{
+                    b--;
                 }
             }
         }
@@ -48,6 +53,10 @@ public class CPUMain {
 
         Camera cam = new Camera(aspectRatio, imageWidth);
 
+
+        long startTime = System.currentTimeMillis();
         cam.render(world);
+        long duration = System.currentTimeMillis() - startTime;
+        System.out.println("Completed in " + (duration) + " milliseconds");
     }
 }
