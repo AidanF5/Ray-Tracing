@@ -18,13 +18,14 @@ import java.io.File;
 public class Main {
     private static final int WIDTH = 1920;
     private static final int HEIGHT = 1080;
-    private static final int SAMPLES_PER_PIXEL = 10;
+    private static final int SAMPLES_PER_PIXEL = 256;
+    private static final int BOUNCES_PER_RAY = 64;
 
-    private static final Vec3 camPos = new Vec3(0.0f, 0.0f, 1.5f);
-    private static final Vec3 camFor = VectorOperations.normalise(new Vec3(0.0f, 0.0f, -1.0f));
+    private static final Vec3 camPos = new Vec3(13.0f, 2.0f, 3.0f);
+    private static final Vec3 camFor = VectorOperations.normalise(new Vec3(-13.0f, -2.0f, -3.0f));
     private static final Vec3 camUp = new Vec3(0.0f, 1.0f, 0.0f);
     private static final Vec3 camRight = VectorOperations.normalise(VectorOperations.cross(camFor, camUp));
-    private static final float fov = 45.0f;
+    private static final float fov = 20.0f;
 
     public static void main(String[] args) {
         //Initalise and create window
@@ -61,28 +62,13 @@ public class Main {
         MemoryUtil.memFree(buffer);
 
         //Compile GLSL Shader
-        String shaderSource = "";
-        try {
-            shaderSource = Files.readString(Path.of("src/main/resources/shaders/raytracer.comp"));
-        }
-        catch (Exception e){
-            System.out.println("AHHHHHHH?");
-        }
-        int computeShader = GL43.glCreateShader(GL43.GL_COMPUTE_SHADER);
-        GL43.glShaderSource(computeShader, shaderSource);
-        GL43.glCompileShader(computeShader);
-
-        if (GL43.glGetShaderi(computeShader, GL43.GL_COMPILE_STATUS) == GL43.GL_FALSE) {
-            throw new RuntimeException("Compute Shader Error:\n" + GL43.glGetShaderInfoLog(computeShader));
-        }
-
-        int program = GL43.glCreateProgram();
-        GL43.glAttachShader(program, computeShader);
-        GL43.glLinkProgram(program);
+        int program = createProgram("src/main/resources/shaders");
 
         //Set Uniforms
         GL43.glUseProgram(program);
         GL43.glUniform1i(GL43.glGetUniformLocation(program, "u_Samples"), SAMPLES_PER_PIXEL);
+        GL43.glUniform1i(GL43.glGetUniformLocation(program, "u_maxBounces"), BOUNCES_PER_RAY);
+        GL43.glUniform1i(GL43.glGetUniformLocation(program, "u_SamplesPerPass"), 4);
         GL43.glUniform3f(GL43.glGetUniformLocation(program, "u_CamPos"), camPos.x(), camPos.y(), camPos.z());
         GL43.glUniform3f(GL43.glGetUniformLocation(program, "u_CamFor"), camFor.x(), camFor.y(), camFor.z());
         GL43.glUniform3f(GL43.glGetUniformLocation(program, "u_CamRight"), camRight.x(), camRight.y(), camRight.z());
@@ -93,11 +79,28 @@ public class Main {
         long startTime = System.currentTimeMillis();
 
         //Render the Image
-        GL43.glBindImageTexture(0, outputTexture, 0, false, 0, GL43.GL_WRITE_ONLY, GL43.GL_RGBA32F);
-        GL43.glDispatchCompute((WIDTH + 15)/16, (HEIGHT + 15)/16, 1);
-        GL43.glMemoryBarrier(GL43.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-        GL43.glFinish();
+        int passes = SAMPLES_PER_PIXEL/4;
+        int framebuffers = GL43.glGenFramebuffers();
 
+        for (int i = 0; i < passes; i++) {
+            GLFW.glfwPollEvents();
+            if(GLFW.glfwWindowShouldClose(window)){
+                break;
+            }
+
+            GL43.glUniform1i(GL43.glGetUniformLocation(program, "u_CurrentSample"), i);
+            GL43.glBindImageTexture(0, outputTexture, 0, false, 0, GL43.GL_READ_WRITE, GL43.GL_RGBA32F);
+            GL43.glDispatchCompute((WIDTH + 15) / 16, (HEIGHT + 15) / 16, 1);
+            GL43.glMemoryBarrier(GL43.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+            GL43.glBindFramebuffer(GL43.GL_READ_FRAMEBUFFER, framebuffers);
+            GL43.glFramebufferTexture2D(GL43.GL_READ_FRAMEBUFFER, GL43.GL_COLOR_ATTACHMENT0, GL43.GL_TEXTURE_2D, outputTexture, 0);
+            GL43.glBlitFramebuffer(0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, GL43.GL_COLOR_BUFFER_BIT, GL43.GL_NEAREST);
+
+            GLFW.glfwSwapBuffers(window);
+
+        }
+        GL43.glFinish();
 
         //Move image from GPU to PNG
         saveTexturePNG(outputTexture, WIDTH, HEIGHT, "renderImage.png");
@@ -150,6 +153,7 @@ public class Main {
             e.printStackTrace();
         }
     }
+
     private static void createScene(ByteBuffer buf){
 
         addObject(buf, 0, 0, 0, 0,
@@ -214,5 +218,46 @@ public class Main {
                 1, 0, 0, 0);
 
 
+    }
+
+
+    public static int createProgram(String folder){
+        StringBuilder fullShader = new StringBuilder();
+
+        File f = new File(folder);
+        File[] listOfFiles = f.listFiles();
+        int program = GL43.glCreateProgram();
+
+        for (int i = 0; i < listOfFiles.length; i++) {
+            try {
+                fullShader.append(Files.readString(Path.of(listOfFiles[i].getPath())));
+            }
+            catch(Exception e){
+                System.out.println("Failed to read " + Path.of(listOfFiles[i].getPath()));
+                System.exit(0);
+            }
+        }
+
+        int shader = GL43.glCreateShader(GL43.GL_COMPUTE_SHADER);
+
+        GL43.glShaderSource(shader, fullShader.toString());
+        GL43.glCompileShader(shader);
+
+        if(GL43.glGetShaderi(shader, GL43.GL_COMPILE_STATUS) == GL43.GL_FALSE){
+            throw new RuntimeException("Error compiling:\n" + GL43.glGetShaderInfoLog(shader));
+        }
+
+        GL43.glAttachShader(program, shader);
+        GL43.glLinkProgram(program);
+
+        if (GL43.glGetProgrami(program, GL43.GL_LINK_STATUS) == GL43.GL_FALSE) {
+            throw new RuntimeException("Program Linking Error:\n" + GL43.glGetProgramInfoLog(program));
+        }
+
+        GL43.glDetachShader(program, shader);
+        GL43.glDeleteShader(shader);
+
+
+        return program;
     }
 }

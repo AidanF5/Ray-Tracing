@@ -1,0 +1,62 @@
+vec3 rayColour(Ray r, inout uint rngState){
+    vec3 throughput = vec3(1.0);
+
+    for (int bounce = 0; bounce < u_maxBounces; bounce++){
+        RayHit hit = rayIntersect(r, 0.0001, 10000.0);
+        if(hit.valid){
+            Ray scattered;
+            vec3 colour;
+            if(scatter(r, hit, colour, scattered, rngState)){
+                throughput *= colour;
+                r = scattered;
+            }
+            else{
+                return vec3(0.0);
+            }
+        }
+        else{
+            vec3 unitD = normalize(r.d);
+            float a = 0.5 * (unitD.y + 1.0);
+            vec3 skyColour = (1.0 - a) * vec3(1.0) + a * vec3(0.5, 0.7, 1.0);
+            return throughput * skyColour;
+        }
+    }
+    return vec3(0.0);
+}
+
+void main(){
+    ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 dims = imageSize(imgOutput);
+
+    if(pixelCoords.x >= dims.x || pixelCoords.y >= dims.y){
+        return;
+    }
+
+    uint rngState = uint(pixelCoords.x * 1973 + pixelCoords.y * 9277 + u_CurrentSample * 26699);
+    pcgHash(rngState);
+
+    float halfFov = tan(radians(u_Fov) * 0.5);
+    vec3 accumulatedColour = vec3(0.0);
+
+    for (int s = 0; s < u_SamplesPerPass; s++){
+        vec2 offset = vec2(randomFloat(rngState), randomFloat(rngState)) - 0.5;
+        vec2 uv = ((vec2(pixelCoords) + offset) / vec2(dims)) * 2.0 - 1.0;
+        uv.x *= float(dims.x)/float(dims.y);
+
+        vec3 rd = normalize(u_CamFor + (uv.x * halfFov * u_CamRight) + (uv.y * halfFov * u_CamUp));
+        Ray r = Ray(u_CamPos, rd);
+
+        accumulatedColour += rayColour(r, rngState);
+    }
+
+    vec3 finalColour = accumulatedColour / float(u_Samples);
+
+    vec3 existingColour = (u_CurrentSample == 0)
+            ? vec3(0.0)
+            : imageLoad(imgOutput, pixelCoords).rgb;
+
+    vec3 newColour = finalColour + existingColour;
+
+    imageStore(imgOutput, pixelCoords, vec4(newColour, 1.0));
+}
+

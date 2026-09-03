@@ -1,0 +1,59 @@
+RayHit hitSphere(Object s, Ray r, float tMin, float tMax){
+    RayHit hit;
+    vec3 oc = s.pos - r.o;
+    float a = dot(r.d, r.d);
+    float h = dot(r.d, oc);
+    float c = dot(oc, oc) - (s.radius * s.radius);
+
+    float discrim = h*h - a*c;
+    if(discrim < 0){
+        hit.valid = false;
+        return hit;
+    }
+    float sqrtd = sqrt(discrim);
+    float root = (h - sqrtd) / a;
+
+    if(root < tMin || root > tMax){
+        root = (h + sqrtd) / a;
+        if (root < tMin || root > tMax){
+            hit.valid = false;
+            return hit;
+        }
+    }
+    hit.t = root;
+    hit.point = r.o + hit.t * r.d;
+    vec3 outwardsNormal = (hit.point - s.pos) / s.radius;
+    hit.frontFace = dot(r.d, outwardsNormal) < 0.0;
+    hit.normal = hit.frontFace ? outwardsNormal : -outwardsNormal;
+    hit.o = s;
+    hit.colour = s.colour;
+    hit.valid = true;
+    return hit;
+}
+
+RayHit rayIntersect(Ray r, float tMin, float tMax){
+    RayHit closestHit;
+    closestHit.valid = false;
+    for (int i = 0; i < objects.length(); i++){
+        RayHit next;
+        switch (objects[i].type){
+            case TYPE_SPHERE:
+                next = hitSphere(objects[i], r, tMin, tMax);
+                break;
+        }
+        if(!closestHit.valid){
+            closestHit = next;
+            if(next.valid){
+                tMax = next.t;
+            }
+        }
+        else if(!next.valid){
+
+        }
+        else if(closestHit.t > next.t){
+            closestHit = next;
+            tMax = closestHit.t;
+        }
+    }
+    return closestHit;
+}
