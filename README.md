@@ -14,4 +14,4 @@ Next steps:
     Add a light material which emits light and removing the sky gradient
     Add planes, cylinders, tori and cones
 
-![Example Image](https://github.com/AidanF5/Ray-Tracing/blob/Master/Saved-Image.png?raw=true)
+![Example Image](https://github.com/AidanF5/Ray-Tracing/blob/master/Saved-Image.png?raw=true)
