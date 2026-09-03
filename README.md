@@ -13,3 +13,5 @@ Next steps:
     Add the different camera settings to the GPU code
     Add a light material which emits light and removing the sky gradient
     Add planes, cylinders, tori and cones
+
+![Example Image](https://github.com/AidanF5/Ray-Tracing/blob/Master/Saved-Image.png?raw=true)
