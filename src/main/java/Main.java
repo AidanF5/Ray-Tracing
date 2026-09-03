@@ -91,7 +91,7 @@ public class Main {
             GL43.glUniform1i(GL43.glGetUniformLocation(program, "u_CurrentSample"), i);
             GL43.glBindImageTexture(0, outputTexture, 0, false, 0, GL43.GL_READ_WRITE, GL43.GL_RGBA32F);
             GL43.glDispatchCompute((WIDTH + 15) / 16, (HEIGHT + 15) / 16, 1);
-            GL43.glMemoryBarrier(GL43.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            GL43.glMemoryBarrier(GL43.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL43.GL_TEXTURE_FETCH_BARRIER_BIT);
 
             GL43.glBindFramebuffer(GL43.GL_READ_FRAMEBUFFER, framebuffers);
             GL43.glFramebufferTexture2D(GL43.GL_READ_FRAMEBUFFER, GL43.GL_COLOR_ATTACHMENT0, GL43.GL_TEXTURE_2D, outputTexture, 0);
@@ -169,7 +169,11 @@ public class Main {
                 float y = 0.2f;
                 float z = b + 0.9f * (float)Math.random();
 
-                if((x-4)*(x-4)+(z*z) > 0.81){
+                boolean clearGlass = x*x + z*z > 0.81;
+                boolean clearLamb = (x+4)*(x+4) + z*z > 0.81;
+                boolean clearMetal = (x-4)*(x-4)+(z*z) > 0.81;
+
+                if(clearGlass && clearLamb && clearMetal){
                     Vec3 colour;
                     float matParam1 = 0.0f;
                     int material;

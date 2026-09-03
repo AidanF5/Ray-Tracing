@@ -10,13 +10,13 @@ bool scatter(Ray r, RayHit hit, out vec3 colour, out Ray scattered, inout uint r
         if(length(scatteredDirection) < 0.00001){
             scatteredDirection = hit.normal;
         }
-        scattered = Ray(hit.point, normalize(scatteredDirection));
+        scattered = Ray(hit.point + (hit.normal * 0.0002), normalize(scatteredDirection));
         colour = hit.colour;
         return true;
     }
     else if(hit.o.material == MATERIAL_METAL){
         vec3 reflected = normalize(reflect(r.d, hit.normal));
-        scattered = Ray(hit.point, normalize(reflected + hit.o.matParam1 * randomInUnitSphere(rngState)));
+        scattered = Ray(hit.point + (hit.normal * 0.0002), normalize(reflected + hit.o.matParam1 * randomInUnitSphere(rngState)));
         colour = hit.colour;
         return dot(scattered.d, hit.normal) > 0.0;
     }
@@ -37,7 +37,8 @@ bool scatter(Ray r, RayHit hit, out vec3 colour, out Ray scattered, inout uint r
         else{
             direction = refract(unitD, hit.normal, ri);
         }
-        scattered = Ray(hit.point, direction);
+        vec3 offsetNormal = (dot(direction, hit.normal) > 0.0) ? hit.normal : -hit.normal;
+        scattered = Ray(hit.point + (offsetNormal * 0.0002), direction);
         return true;
     }
     return false;
