@@ -4,7 +4,10 @@ public class CPUMain {
 
         ObjectList world = new ObjectList();
 
-        world.add(new Sphere(0, -1000, 0, 1000, new Vec3(0.5f, 0.5f, 0.5f), l));
+
+        Metal m = new Metal(0);
+        //world.add(new Sphere(0, -1000, 0, 1000, new Vec3(0.5f, 0.5f, 0.5f), l));
+        world.add(new Plane(0, 1, 0, 0f, new Vec3(0.5f, 0.5f, 0.5f), m));
 
         for (int a = -11; a < 11; a++) {
             for (int b = -11; b < 11; b++) {
