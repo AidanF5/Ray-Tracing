@@ -162,7 +162,7 @@ public class Main {
         //        0, 0, 0, 0,
         //        1000, 0, 0, 0);
 
-        addObject(buf, 1, 0, 0, 0,
+        addObject(buf, 1, 2, 1.33f, 0,
                 0.5f, 0.5f, 0.5f, 0,
                 0, 0, 0, 0,
                 0, 1, 0, 0,
