@@ -14,6 +14,7 @@ uniform vec3 u_CamRight;
 uniform float u_Fov;
 
 #define TYPE_SPHERE             0
+#define TYPE_PLANE              1
 
 #define MATERIAL_LAMBERTIAN     0
 #define MATERIAL_METAL          1

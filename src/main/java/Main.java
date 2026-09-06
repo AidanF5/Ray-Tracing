@@ -156,11 +156,17 @@ public class Main {
 
     private static void createScene(ByteBuffer buf){
 
-        addObject(buf, 0, 0, 0, 0,
+        //addObject(buf, 0, 0, 0, 0,
+        //        0.5f, 0.5f, 0.5f, 0,
+        //        0, -1000, 0, 0,
+        //        0, 0, 0, 0,
+        //        1000, 0, 0, 0);
+
+        addObject(buf, 1, 2, 1.33f, 0,
                 0.5f, 0.5f, 0.5f, 0,
-                0, -1000, 0, 0,
                 0, 0, 0, 0,
-                1000, 0, 0, 0);
+                0, 1, 0, 0,
+                0, 0, 0, 0);
 
         for (int a = -11; a < 11; a++){
             for (int b = -11; b < 11; b++){

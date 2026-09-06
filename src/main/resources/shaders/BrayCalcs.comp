@@ -31,6 +31,28 @@ RayHit hitSphere(Object s, Ray r, float tMin, float tMax){
     return hit;
 }
 
+RayHit hitPlane(Object p, Ray r, float tMin, float tMax){
+    RayHit hit;
+    if(dot(p.normal, r.d) == 0){
+        hit.valid = false;
+        return hit;
+    }
+    float mul = (-p.additionalParam - dot(p.normal, r.o))/(dot(p.normal, r.d));
+    if(tMin > mul || tMax < mul){
+        hit.valid = false;
+        return hit;
+    }
+    hit.t = mul;
+    hit.point = r.o + hit.t * r.d;
+    hit.frontFace = dot(r.d, p.normal) < 0.0;
+    hit.normal = hit.normal = hit.frontFace ? p.normal : -p.normal;
+    hit.o = p;
+    hit.colour = p.colour;
+    hit.valid = true;
+    return hit;
+
+}
+
 RayHit rayIntersect(Ray r, float tMin, float tMax){
     RayHit closestHit;
     closestHit.valid = false;
@@ -39,6 +61,9 @@ RayHit rayIntersect(Ray r, float tMin, float tMax){
         switch (objects[i].type){
             case TYPE_SPHERE:
                 next = hitSphere(objects[i], r, tMin, tMax);
+                break;
+            case TYPE_PLANE:
+                next = hitPlane(objects[i], r, tMin, tMax);
                 break;
         }
         if(!closestHit.valid){

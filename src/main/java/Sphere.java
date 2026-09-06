@@ -2,7 +2,6 @@ public class Sphere extends Object{
 
     private Vec3 centre;
     private double radius;
-    private Material mat;
 
     public Sphere(float x, float y, float z, double r, Vec3 c, Material m){
         centre = new Vec3(x, y, z);
