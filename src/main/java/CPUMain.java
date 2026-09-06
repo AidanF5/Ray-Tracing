@@ -44,13 +44,16 @@ public class CPUMain {
         }
 
         Material material1 = new Dielectric(1.5f);
-        world.add(new Sphere(0, 1, 0, 1.0, new Vec3(1.0f, 1.0f, 1.0f), material1));
+        //world.add(new Sphere(0, 1, 0, 1.0, new Vec3(1.0f, 1.0f, 1.0f), material1));
+        world.add(new Cylinder(0, 0.5f, 0,0, 1, 0, 1.0f,1, true, new Vec3(1.0f, 1.0f, 1.0f), material1));
 
         Material material2 = new Lambertian();
-        world.add(new Sphere(-4, 1, 0, 1.0, new Vec3(0.4f, 0.2f, 0.1f), material2));
+        //world.add(new Sphere(-4, 1, 0, 1.0, new Vec3(0.4f, 0.2f, 0.1f), material2));
+        world.add(new Cylinder(-4, 0.5f, 0,0, 1, 0, 1.0f,1, false, new Vec3(0.4f, 0.2f, 0.1f), material2));
 
         Material material3 = new Metal(0.0f);
-        world.add(new Sphere(4, 1, 0, 1.0, new Vec3(0.7f, 0.6f, 0.5f), material3));
+        //.add(new Sphere(4, 1, 0, 1.0, new Vec3(0.7f, 0.6f, 0.5f), material3));
+        world.add(new Cylinder(4, 0.5f, 0,1, 0, 0, 1.0f,4, false, new Vec3(0.9f, 0.2f, 0.1f), material3));
         float aspectRatio = (float) 16 / 9;
         int imageWidth = 1200;
 
