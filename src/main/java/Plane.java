@@ -20,12 +20,12 @@ public class Plane extends Object{
         }
         Vec3 dir = r.direction();
         Vec3 o = r.origin();
-        float multiplier = (d - (a * o.x()) - (b * o.y()) - (c * o.z()))/((a * dir.x()) + (b * dir.y()) + (c * dir.z()));
+        Vec3 normal = new Vec3(a, b, c);
+        float multiplier = (-d -(VectorOperations.dot(normal, r.origin())))/VectorOperations.dot(normal, r.direction());
         if(!interval.surrounds(multiplier)){
             return new RayHit();
         }
         Vec3 pointAt = r.pointAt(multiplier);
-        Vec3 normal = new Vec3(a, b, c);
         Vec3 norm = VectorOperations.normalise(normal);
         RayHit hit = new RayHit(pointAt, normal, multiplier, colour, mat);
         hit.setFrontFace(norm, r);
