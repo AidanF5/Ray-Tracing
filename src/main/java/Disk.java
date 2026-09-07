@@ -18,7 +18,7 @@ public class Disk extends Object{
         if(!hitty.isValid()){
             return hitty;
         }
-        if(centre == new Vec3(0, 0, 0)){ //replace with a distance operation
+        if(VectorOperations.distance(centre, hitty.getPoint()) <= radius){ //replace with a distance operation
             //hit is in the disk
             return hitty;
         }

@@ -49,4 +49,10 @@ public class VectorOperations {
         );
         return VectorOperations.add(orthogonal, parallel);
     }
+
+    public static float distance(Vec3 v, Vec3 u){
+        return (float) Math.sqrt(((v.x() - u.x()) * (v.x() - u.x())) +
+                ((v.y() - u.y()) * (v.y() - u.y())) +
+                ((v.z() - u.z()) * (v.z() - u.z())));
+    }
 }
