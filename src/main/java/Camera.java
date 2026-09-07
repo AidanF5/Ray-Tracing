@@ -9,7 +9,6 @@ public class Camera {
     private int samplesPerPixel = 10;
     private int maxBounces = 10;
     private float vfov = 20;
-    //private Vec3 lookFrom = new Vec3(13, 2, 3);
     private Vec3 lookFrom = new Vec3(13, 2, 3);
     private Vec3 lookAt = new Vec3(0, 0, 0);
     private Vec3 vup = new Vec3(0, 1, 0);
