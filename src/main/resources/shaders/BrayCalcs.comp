@@ -53,6 +53,84 @@ RayHit hitPlane(Object p, Ray r, float tMin, float tMax){
 
 }
 
+RayHit hitCylinder(Object c, Ray r, float tMin, float tMax){
+    RayHit hit;
+    //Normal for cylinder is normal for its caps, so its axis
+    vec3 aVec = r.d - (dot(r.d, c.normal) * c.normal);
+    vec3 delP = r.o - c.pos;
+    vec3 cVec = delP - (dot(delP, c.normal) * c.normal);
+
+    float a = dot(aVec, aVec);
+    float b = 2 * dot(aVec, cVec);
+    float cc = dot(cVec, cVec) - (c.radius * c.radius);
+    float discrim = (b * b) - (4 * a * cc);
+
+    if(discrim < 0){
+        hit.valid = false;
+        return hit;
+    }
+
+    float closestT = 3.402823466e+38f;
+    vec3 bestNorm;
+    bool hitFound = false;
+
+    //check main cylinder
+    if(a > 1e-6f){
+        float sqrtDiscrim = sqrt(discrim);
+        float[] roots = { (-b - sqrtDiscrim) / (2 * a), (-b + sqrtDiscrim) / (2 * a) };
+
+        for (int i = 0; i < 2; i++){
+            if(roots[i] < closestT && roots[i] < tMax && roots[i] > tMin){
+                vec3 point = r.o + roots[i] * r.d;
+                float y = dot(point - c.pos, c.normal);
+                if(y >= -c.height/2.0f && y <= c.height/2.0f){
+                    closestT = roots[i];
+                    vec3 projectedY = y * c.normal;
+                    bestNorm = normalize(point - c.pos - projectedY);
+                    hitFound = true;
+                }
+            }
+        }
+    }
+    //Check the caps
+    //additionalParam = 1 if caps, else 0
+    if(c.additionalParam == 1){
+        float dirToAxis = dot(r.d, c.normal);
+        if(abs(dirToAxis) > 1e-6f){
+            float[] capsY = {c.height/2.0f, -c.height/2.0f};
+            vec3[] capNorms = {c.normal, -c.normal};
+
+            for (int i = 0; i < 2; i++){
+                float tCap = (capsY[i] - dot(delP, c.normal)) / dirToAxis;
+
+                if(tCap < closestT && tCap < tMax && tCap > tMin){
+                    vec3 pCap = r.o + tCap * r.d;
+                    vec3 capPos = c.pos + (capsY[i] * c.normal);
+                    vec3 distVec = pCap - capPos;
+                    if(dot(distVec, distVec) <= (c.radius * c.radius)){
+                        closestT = tCap;
+                        bestNorm = capNorms[i];
+                        hitFound = true;
+                    }
+                }
+            }
+        }
+    }
+    if(!hitFound){
+        hit.valid = false;
+        return hit;
+    }
+    vec3 hitPoint = r.o + closestT * r.d;
+    hit.point = hitPoint;
+    hit.t = closestT;
+    hit.colour = c.colour;
+    hit.valid = true;
+    hit.frontFace = dot(r.d, bestNorm) < 0.0;
+    hit.normal = hit.frontFace ? bestNorm : -bestNorm;
+    hit.o = c;
+    return hit;
+}
+
 
 RayHit hitDisk(Object d, Ray r, float tMin, float tMax){
     RayHit hit;
@@ -74,7 +152,7 @@ RayHit hitDisk(Object d, Ray r, float tMin, float tMax){
     hit.t = mul;
     hit.point = point;
     hit.frontFace = dot(r.d, d.normal) < 0.0;
-    hit.normal = hit.normal = hit.frontFace ? d.normal : -d.normal;
+    hit.normal = hit.frontFace ? d.normal : -d.normal;
     hit.o = d;
     hit.colour = d.colour;
     hit.valid = true;
@@ -92,6 +170,9 @@ RayHit rayIntersect(Ray r, float tMin, float tMax){
                 break;
             case TYPE_PLANE:
                 next = hitPlane(objects[i], r, tMin, tMax);
+                break;
+            case TYPE_CYLINDER:
+                next = hitCylinder(objects[i], r, tMin, tMax);
                 break;
             case TYPE_DISK:
                 next = hitDisk(objects[i], r, tMin, tMax);
