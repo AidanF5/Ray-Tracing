@@ -1,5 +1,7 @@
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 public class Camera {
     private float aspectRatio = 1.0f;
@@ -36,27 +38,30 @@ public class Camera {
 
     public void render(ObjectList world){
         initialise();
-        try (PrintWriter writer = new PrintWriter("image.ppm")) {
-            writer.print("P3\n" + imageWidth + " " + imageHeight + "\n255\n");
-            System.out.println("P3\n" + imageWidth + " " + imageHeight + "\n255\n");
-            for (int j = 0; j < imageHeight; j++) {
-                System.out.println("Scan Line Remaining: " + (imageHeight-j));
-                for (int i = 0; i < imageWidth; i++) {
 
-                    Vec3 col = new Vec3(0, 0, 0);
-                    for (int k = 0; k < samplesPerPixel; k++) {
-                        Ray r = getRay(i, j);
-                        col = VectorOperations.add(col, colourRay(r, world, maxBounces));
-                    }
+        BufferedImage image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_RGB);
+        System.out.println("P3\n" + imageWidth + " " + imageHeight + "\n255\n");
+        for (int j = 0; j < imageHeight; j++) {
+            System.out.println("Scan Line Remaining: " + (imageHeight-j));
+            for (int i = 0; i < imageWidth; i++) {
 
-                    // Output pixel color to file using the helper
-                    ColourUtils.writeColour(writer, VectorOperations.scale(pixelSamplesScales, col));
+                Vec3 col = new Vec3(0, 0, 0);
+                for (int k = 0; k < samplesPerPixel; k++) {
+                    Ray r = getRay(i, j);
+                    col = VectorOperations.add(col, colourRay(r, world, maxBounces));
                 }
+
+                // Output pixel color to file using the helper
+                image.setRGB(i, j, ColourUtils.getImageColour(VectorOperations.scale(pixelSamplesScales, col)));
             }
+        }
+        try{
+            File output = new File("image.png");
+            ImageIO.write(image, "png", output);
             System.out.println("Done!");
         }
-        catch (IOException e) {
-            e.printStackTrace();
+        catch(Exception e){
+            System.out.println("There was an error saving the file \n" + e.toString());
         }
     }
 
