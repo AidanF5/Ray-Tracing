@@ -45,12 +45,40 @@ RayHit hitPlane(Object p, Ray r, float tMin, float tMax){
     hit.t = mul;
     hit.point = r.o + hit.t * r.d;
     hit.frontFace = dot(r.d, p.normal) < 0.0;
-    hit.normal = hit.normal = hit.frontFace ? p.normal : -p.normal;
+    hit.normal = hit.frontFace ? p.normal : -p.normal;
     hit.o = p;
     hit.colour = p.colour;
     hit.valid = true;
     return hit;
 
+}
+
+
+RayHit hitDisk(Object d, Ray r, float tMin, float tMax){
+    RayHit hit;
+    if(dot(d.normal, r.d) == 0){
+        hit.valid = false;
+        return hit;
+    }
+    float mul = (-d.additionalParam - dot(d.normal, r.o))/(dot(d.normal, r.d));
+    if(tMin > mul || tMax < mul){
+        hit.valid = false;
+        return hit;
+    }
+    vec3 point = r.o + mul * r.d;
+    float dist = distance(point, d.pos);
+    if(dist > d.radius){
+        hit.valid = false;
+        return hit;
+    }
+    hit.t = mul;
+    hit.point = point;
+    hit.frontFace = dot(r.d, d.normal) < 0.0;
+    hit.normal = hit.normal = hit.frontFace ? d.normal : -d.normal;
+    hit.o = d;
+    hit.colour = d.colour;
+    hit.valid = true;
+    return hit;
 }
 
 RayHit rayIntersect(Ray r, float tMin, float tMax){
@@ -64,6 +92,9 @@ RayHit rayIntersect(Ray r, float tMin, float tMax){
                 break;
             case TYPE_PLANE:
                 next = hitPlane(objects[i], r, tMin, tMax);
+                break;
+            case TYPE_DISK:
+                next = hitDisk(objects[i], r, tMin, tMax);
                 break;
         }
         if(!closestHit.valid){
