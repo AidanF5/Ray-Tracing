@@ -4,7 +4,7 @@ public class ColourUtils {
 
     private static double gamma = 2.2;
 
-    public static void writeColour(PrintWriter out, Vec3 pixelColour){
+    public static int getImageColour(Vec3 pixelColour){
         double r = pixelColour.x();
         double g = pixelColour.y();
         double b = pixelColour.z();
@@ -18,7 +18,8 @@ public class ColourUtils {
         int ig = (int) (256 * i.clamp(g));
         int ib = (int) (256 * i.clamp(b));
 
-        out.println(ir + " " + ig + " " + ib);
+        int rgb = (ir << 16) | (ig << 8) | ib;
+        return rgb;
     }
 
     private static double linearToGamma(double linearComponent){

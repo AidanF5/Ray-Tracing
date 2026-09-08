@@ -18,8 +18,7 @@ It also includes GPU code written in GLSL to give a fast render
 &emsp;Shapes including Spheres, Planes and Cylinders
 
 
-## RoadMap: <br />
-&emsp;Native PNG for CPU renderer (replacing PPM format) <br /> 
+## RoadMap: <br /> 
 &emsp;Exporting the rest of the camera controls into GLSL shaders <br />
 &emsp;Implement an emissive light material (removing default sky gradient) <br/>
 &emsp;Implement further primitives of Tori and Cones
