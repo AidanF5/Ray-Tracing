@@ -55,6 +55,7 @@ RayHit hitPlane(Object p, Ray r, float tMin, float tMax){
 
 RayHit hitCylinder(Object c, Ray r, float tMin, float tMax){
     RayHit hit;
+    c.normal = normalize(c.normal);
     //Normal for cylinder is normal for its caps, so its axis
     vec3 aVec = r.d - (dot(r.d, c.normal) * c.normal);
     vec3 delP = r.o - c.pos;
