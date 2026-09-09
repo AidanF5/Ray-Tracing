@@ -54,7 +54,9 @@ public class CPUMain {
 
         Material material3 = new Metal(0.0f);
         //.add(new Sphere(4, 1, 0, 1.0, new Vec3(0.7f, 0.6f, 0.5f), material3));
-        world.add(new Cylinder(4, 0.5f, 0,1, 0, 0, 1.0f,3, false, new Vec3(0.9f, 0.2f, 0.1f), material3));
+        //world.add(new Cylinder(4, 0.5f, 0,1, 0, 0, 1.0f,3, false, new Vec3(0.9f, 0.2f, 0.1f), material3));
+        //world.add(new Frustrum(4, 0, 0, 1, 1, -0.5f, 0, 2, (float) Math.PI/6, true, new Vec3(0.7f, 0.6f, 0.5f), material3));
+        world.add(new Frustrum(4, 0, 0, 1, 1, 0, 0, 2, (float) Math.PI/6, false, new Vec3(0.7f, 0.6f, 0.5f), material3));
         float aspectRatio = (float) 16 / 9;
         int imageWidth = 1200;
 
