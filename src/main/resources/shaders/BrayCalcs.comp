@@ -76,7 +76,7 @@ RayHit hitCylinder(Object c, Ray r, float tMin, float tMax){
     bool hitFound = false;
 
     //check main cylinder
-    if(a > 1e-6f){
+    if(abs(a) > 1e-6f){
         float sqrtDiscrim = sqrt(discrim);
         float[] roots = { (-b - sqrtDiscrim) / (2 * a), (-b + sqrtDiscrim) / (2 * a) };
 
@@ -132,6 +132,82 @@ RayHit hitCylinder(Object c, Ray r, float tMin, float tMax){
     return hit;
 }
 
+RayHit hitFrustrum(Object f, Ray r, float tMin, float tMax){
+    RayHit hit;
+    f.normal = normalize(f.normal);
+    vec3 delP = r.o - f.pos;
+    float cosSqrdTheta = pow(cos(f.radius), 2.0);
+    float a = pow(dot(r.d, f.normal), 2.0) - cosSqrdTheta * dot(r.d, r.d);
+    float b = 2 * (dot(r.d, f.normal) * dot(delP, f.normal) - cosSqrdTheta * dot(r.d, delP));
+    float c = pow(dot(delP, f.normal), 2.0) - cosSqrdTheta * dot(delP, delP);
+
+    float discrim = (b * b) - (4 * a * c);
+    if(discrim < 0){
+        hit.valid = false;
+        return hit;
+    }
+
+    float bestT = 3.402823466e+38f;
+    vec3 bestNorm;
+    bool hitFound = false;
+
+    if(abs(a) > 1e-6f){
+        float sqrtDiscrim = sqrt(discrim);
+        float[] roots = { (-b - sqrtDiscrim) / (2 * a), (-b + sqrtDiscrim) / (2 * a) };
+
+        for (int i = 0; i < 2; i++){
+            if (roots[i] < bestT && roots[i] < tMax && roots[i] > tMin){
+                vec3 intersect = r.o + roots[i] * r.d;
+                vec3 intersectToPoint = intersect - f.pos;
+                float h = dot(intersectToPoint, f.normal);
+                if(h <= f.height && h >= f.shapeParam1){
+                    bestT = roots[i];
+                    hitFound = true;
+                    bestNorm = normalize(intersectToPoint - ((h/cosSqrdTheta) * f.normal));
+                }
+            }
+        }
+    }
+
+    if(f.additionalParam == 1){
+        float dirToAxis = dot(r.d, f.normal);
+        if(abs(dirToAxis) > 1e-6f){
+            vec3[] capNorms = {-f.normal, f.normal};
+            float[] capHeights = {f.shapeParam1, f.height};
+            for (int i = 0; i < 2; i++){
+                if(capHeights[i] == 0){
+                    continue;
+                }
+                vec3 capBase = f.pos + capHeights[i] * f.normal;
+                float multiplier = dot(capBase - r.o, f.normal) / dot(r.d, f.normal);
+                if(multiplier < bestT && multiplier > tMin && multiplier < tMax){
+                    vec3 intersect = r.o + multiplier * r.d;
+                    if(pow(length(intersect - capBase), 2.0) <= pow(capHeights[i] * tan(f.radius), 2.0)){
+                        bestT = multiplier;
+                        hitFound = true;
+                        bestNorm = capNorms[i];
+                    }
+                }
+            }
+        }
+    }
+
+    if(!hitFound){
+        hit.valid = false;
+        return hit;
+    }
+
+    vec3 hitPoint = r.o + bestT * r.d;
+    hit.point = hitPoint;
+    hit.t = bestT;
+    hit.colour = f.colour;
+    hit.valid = true;
+    hit.frontFace = dot(r.d, bestNorm) < 0.0;
+    hit.normal = hit.frontFace ? bestNorm : -bestNorm;
+    hit.o = f;
+    return hit;
+}
+
 
 RayHit hitDisk(Object d, Ray r, float tMin, float tMax){
     RayHit hit;
@@ -174,6 +250,9 @@ RayHit rayIntersect(Ray r, float tMin, float tMax){
                 break;
             case TYPE_CYLINDER:
                 next = hitCylinder(objects[i], r, tMin, tMax);
+                break;
+            case TYPE_FRUSTRUM:
+                next = hitFrustrum(objects[i], r, tMin, tMax);
                 break;
             case TYPE_DISK:
                 next = hitDisk(objects[i], r, tMin, tMax);

@@ -36,10 +36,10 @@ public class Frustrum extends Object{
         Vec3 bestNorm = null;
         boolean hit = false;
 
-        float sqrtDiscrim = (float) Math.sqrt(discrim);
-        float[] roots = {(-b - sqrtDiscrim) / (2*a), (-b + sqrtDiscrim) / (2*a)};
 
         if(Math.abs(a) > 1e-6f) {
+            float sqrtDiscrim = (float) Math.sqrt(discrim);
+            float[] roots = {(-b - sqrtDiscrim) / (2*a), (-b + sqrtDiscrim) / (2*a)};
             for (int i = 0; i < 2; i++) {
                 if (interval.surrounds(roots[i]) && roots[i] < bestT) {
                     Vec3 intersect = r.pointAt(roots[i]);

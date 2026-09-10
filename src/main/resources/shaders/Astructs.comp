@@ -16,6 +16,7 @@ uniform float u_Fov;
 #define TYPE_SPHERE             0
 #define TYPE_PLANE              1
 #define TYPE_CYLINDER           2
+#define TYPE_FRUSTRUM           3
 #define TYPE_DISK               11
 
 #define MATERIAL_LAMBERTIAN     0
