@@ -120,12 +120,12 @@ public class Main {
                            float r, float g, float b, float matParam3,
                            float x, float y, float z, float matParam4,
                            float nx, float ny, float nz, float matParam5,
-                           float radius, float height, float matParam6, float additionalParam){
+                           float radius, float height, float shapeParam1, float additionalParam){
         buf.putInt(type).putInt(material).putFloat(matParam1).putFloat(matParam2);
         buf.putFloat(r).putFloat(g).putFloat(b).putFloat(matParam3);
         buf.putFloat(x).putFloat(y).putFloat(z).putFloat(matParam4);
         buf.putFloat(nx).putFloat(ny).putFloat(nz).putFloat(matParam5);
-        buf.putFloat(radius).putFloat(height).putFloat(matParam6).putFloat(additionalParam);
+        buf.putFloat(radius).putFloat(height).putFloat(shapeParam1).putFloat(additionalParam);
     }
 
     private static void saveTexturePNG(int textID, int width, int height, String filepath){
@@ -215,14 +215,15 @@ public class Main {
                 }
             }
         }
+
+        addObject(buf, 3, 1, 0.05f, 0,
+                1, 1, 1, 0,
+                0, 0, 0, 0,
+                -0.5f, 1, 0, 0,
+                (float)(Math.PI/6), 2, 1, 1);
+
         addObject(buf, 0, 2, 1.5f, 0,
                 1, 1, 1, 0,
-                0, 1, 0, 0,
-                0, 0, 0, 0,
-                1, 0, 0, 0);
-
-        addObject(buf, 0, 0, 0, 0,
-                0.4f, 0.2f, 0.1f, 0,
                 -4, 1, 0, 0,
                 0, 0, 0, 0,
                 1, 0, 0, 0);
