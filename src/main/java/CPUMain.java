@@ -57,6 +57,12 @@ public class CPUMain {
         //world.add(new Cylinder(4, 0.5f, 0,1, 0, 0, 1.0f,3, false, new Vec3(0.9f, 0.2f, 0.1f), material3));
         //world.add(new Frustrum(4, 0, 0, 1, 1, -0.5f, 0, 2, (float) Math.PI/6, true, new Vec3(0.7f, 0.6f, 0.5f), material3));
         world.add(new Frustrum(4, 0, 0, 1, 1, 0, 0, 2, (float) Math.PI/6, false, new Vec3(0.7f, 0.6f, 0.5f), material3));
+
+        Light lighty = new Light();
+        world.add(new Sphere(3, 1.5f, 3, 0.4f, new Vec3(10, 25, 50), lighty));
+
+        //world.add(new Disk(-1 ,-1, -1, -45,15, 15, 15, 13, new Vec3(100, 100, 100), lighty));
+
         float aspectRatio = (float) 16 / 9;
         int imageWidth = 1200;
 
