@@ -1,6 +1,5 @@
 public class Lambertian extends Material{
 
-    //private Vec3 colour = new Vec3(0, 0, 0);
 
     public Lambertian(){
 

@@ -8,14 +8,15 @@ public class Camera {
     private int imageWidth = 100;
     //private int samplesPerPixel = 100;
     //private int maxBounces = 30;
-    private int samplesPerPixel = 10;
-    private int maxBounces = 10;
+    private int samplesPerPixel = 50;
+    private int maxBounces = 20;
     private float vfov = 20;
     private Vec3 lookFrom = new Vec3(13, 2, 3);
     private Vec3 lookAt = new Vec3(0, 0, 0);
     private Vec3 vup = new Vec3(0, 1, 0);
     private float defocusAngle = 0.6f;
     private float focusDist = 10.0f;
+    private Vec3 backgroundCol = new Vec3(0, 0, 0);
 
     private int imageHeight;
     private Vec3 cameraOrigin;
@@ -113,18 +114,20 @@ public class Camera {
         if(hitty.isValid()){
             Ray scattered = new Ray();
             Vec3 colour = new Vec3(0, 0, 0);
-            if(hitty.getMaterial().scatter(r, hitty, colour, scattered)){
-                return VectorOperations.multiplyComponents(colour, colourRay(scattered, world, depth-1));
+            Vec3 emitted = new Vec3(0, 0, 0);
+            if(hitty.getMaterial().emitted()){
+                emitted = hitty.getColour();
             }
-            //Vec3 direction = VectorOperations.add(hitty.getNormal(), Vec3.randomUnit());
-            //return VectorOperations.scale(0.5, colourRay(new Ray(hitty.getPoint(), direction), world, depth-1));
-            return new Vec3(0, 0, 0);
+            if(hitty.getMaterial().scatter(r, hitty, colour, scattered)){
+                return VectorOperations.add(VectorOperations.multiplyComponents(colour, colourRay(scattered, world, depth-1)), emitted);
+            }
+            return emitted;
         }
 
-
-        Vec3 unit_direction = VectorOperations.scale((float)1/r.direction().getMag(), r.direction());
-        float a = (float)(0.5*(unit_direction.y()+1.0));
-        return VectorOperations.add(VectorOperations.scale((1.0f-a), new Vec3(1.0f, 1.0f, 1.0f)), VectorOperations.scale(a, new Vec3(0.5f, 0.7f, 1.0f)));
+        return backgroundCol;
+        //Vec3 unit_direction = VectorOperations.scale((float)1/r.direction().getMag(), r.direction());
+        //float a = (float)(0.5*(unit_direction.y()+1.0));
+        //return VectorOperations.add(VectorOperations.scale((1.0f-a), new Vec3(1.0f, 1.0f, 1.0f)), VectorOperations.scale(a, new Vec3(0.5f, 0.7f, 1.0f)));
     }
 
     private Ray getRay(int i, int j){

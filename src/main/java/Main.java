@@ -18,8 +18,8 @@ import java.io.File;
 public class Main {
     private static final int WIDTH = 1920;
     private static final int HEIGHT = 1080;
-    private static final int SAMPLES_PER_PIXEL = 256;
-    private static final int BOUNCES_PER_RAY = 64;
+    private static final int SAMPLES_PER_PIXEL = 2048;
+    private static final int BOUNCES_PER_RAY = 128;
 
     private static final Vec3 camPos = new Vec3(13.0f, 2.0f, 3.0f);
     private static final Vec3 camFor = VectorOperations.normalise(new Vec3(-13.0f, -2.0f, -3.0f));
@@ -48,7 +48,7 @@ public class Main {
         GL43.glTexStorage2D(GL43.GL_TEXTURE_2D, 1, GL43.GL_RGBA32F, WIDTH, HEIGHT);
 
         //Get the scene data
-        int numObjects = 488;
+        int numObjects = 490;
         ByteBuffer buffer = MemoryUtil.memAlloc(numObjects * 80);  //int and floats are 4 bytes
 
         createScene(buffer);
@@ -74,6 +74,7 @@ public class Main {
         GL43.glUniform3f(GL43.glGetUniformLocation(program, "u_CamRight"), camRight.x(), camRight.y(), camRight.z());
         GL43.glUniform3f(GL43.glGetUniformLocation(program, "u_CamUp"), camUp.x(), camUp.y(), camUp.z());
         GL43.glUniform1f(GL43.glGetUniformLocation(program, "u_Fov"), fov);
+        GL43.glUniform3f(GL43.glGetUniformLocation(program, "u_backgroundCol"), 0, 0, 0);
 
         System.out.println("Rendering " + WIDTH + "x" + HEIGHT + " image at " + SAMPLES_PER_PIXEL + " samples per pixel on GPU...");
         long startTime = System.currentTimeMillis();
@@ -119,12 +120,12 @@ public class Main {
     private static void addObject(ByteBuffer buf, int type, int material, float matParam1, float matParam2,
                            float r, float g, float b, float matParam3,
                            float x, float y, float z, float matParam4,
-                           float nx, float ny, float nz, float matParam5,
+                           float nx, float ny, float nz, float emitt,
                            float radius, float height, float shapeParam1, float additionalParam){
         buf.putInt(type).putInt(material).putFloat(matParam1).putFloat(matParam2);
         buf.putFloat(r).putFloat(g).putFloat(b).putFloat(matParam3);
         buf.putFloat(x).putFloat(y).putFloat(z).putFloat(matParam4);
-        buf.putFloat(nx).putFloat(ny).putFloat(nz).putFloat(matParam5);
+        buf.putFloat(nx).putFloat(ny).putFloat(nz).putFloat(emitt);
         buf.putFloat(radius).putFloat(height).putFloat(shapeParam1).putFloat(additionalParam);
     }
 
@@ -233,6 +234,20 @@ public class Main {
                 4, 1, 0, 0,
                 1, 1, 0, 0,
                 1, 1, 0, 0);
+
+
+        addObject(buf, 0, 3, 0, 0,
+                25, 25, 25, 0,
+                3, 1.5f, 3, 0,
+                0, 0, 0, 1,
+                0.4f, 0, 0, 0);
+
+
+        addObject(buf, 0, 3, 0, 0,
+                25, 25, 25, 0,
+                -3, 2, -3, 0,
+                0, 0, 0, 1,
+                0.5f, 0, 0, 0);
 
 
     }
