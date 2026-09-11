@@ -12,6 +12,7 @@ uniform vec3 u_CamFor;
 uniform vec3 u_CamUp;
 uniform vec3 u_CamRight;
 uniform float u_Fov;
+uniform vec3 u_backgroundCol;
 
 #define TYPE_SPHERE             0
 #define TYPE_PLANE              1
@@ -22,6 +23,7 @@ uniform float u_Fov;
 #define MATERIAL_LAMBERTIAN     0
 #define MATERIAL_METAL          1
 #define MATERIAL_DIELECTRIC     2
+#define MATERIAL_LIGHT          3
 
 struct Ray{
     vec3 o;
@@ -38,7 +40,7 @@ struct Object{
     vec3 pos;
     float matParam4;
     vec3 normal;
-    float matParam5;
+    float emitt;
     float radius;
     float height;
     float shapeParam1;
