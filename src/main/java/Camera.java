@@ -121,8 +121,6 @@ public class Camera {
             if(hitty.getMaterial().scatter(r, hitty, colour, scattered)){
                 return VectorOperations.add(VectorOperations.multiplyComponents(colour, colourRay(scattered, world, depth-1)), emitted);
             }
-            //Vec3 direction = VectorOperations.add(hitty.getNormal(), Vec3.randomUnit());
-            //return VectorOperations.scale(0.5, colourRay(new Ray(hitty.getPoint(), direction), world, depth-1));
             return emitted;
         }
 
