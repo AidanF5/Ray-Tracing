@@ -17,8 +17,10 @@ import java.io.File;
 public class Main {
     private static final int WIDTH = 1920;
     private static final int HEIGHT = 1080;
-    private static final int SAMPLES_PER_PIXEL = 256;
-    private static final int BOUNCES_PER_RAY = 64;
+    private static final int SAMPLES_PER_PIXEL = 16384;
+    private static final int BOUNCES_PER_RAY = 512;
+    //private static final int SAMPLES_PER_PIXEL = 256;
+    //private static final int BOUNCES_PER_RAY = 64;
 
     //private static final Vec3 camPos = new Vec3(13.0f, 2.0f, 3.0f);
     //private static final Vec3 camFor = VectorOperations.normalise(new Vec3(-13.0f, -2.0f, -3.0f));
@@ -51,7 +53,7 @@ public class Main {
 
         //Get the scene data
         //int numObjects = 490;
-        int numObjects = 244;
+        int numObjects = 245;
         ByteBuffer buffer = MemoryUtil.memAlloc(numObjects * 80);  //int and floats are 4 bytes
 
         //createTestScene(buffer);
@@ -79,7 +81,7 @@ public class Main {
         GL43.glUniform3f(GL43.glGetUniformLocation(program, "u_CamUp"), camUp.x(), camUp.y(), camUp.z());
         GL43.glUniform1f(GL43.glGetUniformLocation(program, "u_Fov"), fov);
         //GL43.glUniform3f(GL43.glGetUniformLocation(program, "u_backgroundCol"), 0, 0, 0);
-        GL43.glUniform3f(GL43.glGetUniformLocation(program, "u_backgroundCol"), 0.02f, 0.15f, 0.3f);
+        GL43.glUniform3f(GL43.glGetUniformLocation(program, "u_backgroundCol"), 0.01f, 0.02f, 0.15f);
         //GL43.glUniform3f(GL43.glGetUniformLocation(program, "u_backgroundCol"), 1, 1, 1);
 
         System.out.println("Rendering " + WIDTH + "x" + HEIGHT + " image at " + SAMPLES_PER_PIXEL + " samples per pixel on GPU...");
@@ -556,6 +558,11 @@ public class Main {
                 0.13f, 1.955f, -0.14f, 0,
                 0, 1, 0, 0,
                 0.015f, 0.1f, 0, 1);
+        addObject(buf, 2, 2, 1/2f, 0,
+                1f, 1f, 1f, 0,
+                0.13f, 1.965f, -0.14f, 0,
+                0, 1, 0, 0,
+                0.011f, 0.08f, 0, 1);
 
         addObject(buf, 0, 0, 0, 0,
                 0.2f, 0.4f, 0.6f, 0,
@@ -584,11 +591,11 @@ public class Main {
                 0.183537f, 1.962f, -0.271186f, 0,
                 0, 0, 0, 0,
                 0.012f, 0, 0, 0);
-        addObject(buf, 11, 3, 0, 0,
-                10, 10, 10, 0,
+        addObject(buf, 2, 3, 0, 0,
+                15, 15, 15, 0,
                 0.216528f, 1.962f, -0.30889f, 0,
                 0.35f, 0, -0.4f, 1,
-                0.012f, 0.05f, 0, 0.1993408f);
+                0.01f, 0.005f, 0, 0.1993408f);
         addObject(buf, 0, 2, 0.2f, 0,
                 0.3f, 0.3f, 0.4f, 0,
                 0.214617f, 1.970485f, -0.29382f, 0,
