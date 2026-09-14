@@ -17,10 +17,10 @@ import java.io.File;
 public class Main {
     private static final int WIDTH = 1920;
     private static final int HEIGHT = 1080;
-    private static final int SAMPLES_PER_PIXEL = 16384;
-    private static final int BOUNCES_PER_RAY = 512;
-    //private static final int SAMPLES_PER_PIXEL = 256;
-    //private static final int BOUNCES_PER_RAY = 64;
+    //private static final int SAMPLES_PER_PIXEL = 16384;
+    //private static final int BOUNCES_PER_RAY = 512;
+    private static final int SAMPLES_PER_PIXEL = 256;
+    private static final int BOUNCES_PER_RAY = 64;
 
     //private static final Vec3 camPos = new Vec3(13.0f, 2.0f, 3.0f);
     //private static final Vec3 camFor = VectorOperations.normalise(new Vec3(-13.0f, -2.0f, -3.0f));
@@ -30,6 +30,7 @@ public class Main {
     private static final Vec3 camUp = new Vec3(0.0f, 1.0f, 0.0f);
     private static final Vec3 camRight = VectorOperations.normalise(VectorOperations.cross(camFor, camUp));
     private static final float fov = 70.0f;
+    private static final float gamma = 1f;
 
     public static void main(String[] args) {
         //Initalise and create window
@@ -148,9 +149,9 @@ public class Main {
                 int index = ((height - 1 - y) * width + x) * 4;
 
                 //take gamma as 2
-                float r = (float) Math.sqrt(Math.max(0.0f, Math.min(1.0f, pixels.get(index))));
-                float g = (float) Math.sqrt(Math.max(0.0f, Math.min(1.0f, pixels.get(index + 1))));
-                float b = (float) Math.sqrt(Math.max(0.0f, Math.min(1.0f, pixels.get(index + 2))));
+                float r = (float) Math.pow(Math.max(0.0f, Math.min(1.0f, pixels.get(index))), 1/gamma);
+                float g = (float) Math.pow(Math.max(0.0f, Math.min(1.0f, pixels.get(index + 1))), 1/gamma);
+                float b = (float) Math.pow(Math.max(0.0f, Math.min(1.0f, pixels.get(index + 2))), 1/gamma);
 
                 int rgb = ((int)(r * 255) << 16) | ((int)(g * 255) << 8) | (int)(b * 255);
                 image.setRGB(x, y, rgb);
