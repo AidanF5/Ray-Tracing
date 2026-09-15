@@ -21,3 +21,5 @@ It also includes GPU code written in GLSL to give a fast render
 ## RoadMap: <br /> 
 &emsp;Exporting the rest of the camera controls into GLSL shaders <br />
 &emsp;Implement further primitives of Tori
+
+![Example Image](https://github.com/AidanF5/Ray-Tracing/blob/master/ClosingImage.png?raw=true)

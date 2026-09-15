@@ -17,10 +17,10 @@ import java.io.File;
 public class Main {
     private static final int WIDTH = 1920;
     private static final int HEIGHT = 1080;
-    //private static final int SAMPLES_PER_PIXEL = 16384;
-    //private static final int BOUNCES_PER_RAY = 512;
-    private static final int SAMPLES_PER_PIXEL = 256;
-    private static final int BOUNCES_PER_RAY = 64;
+    private static final int SAMPLES_PER_PIXEL = 16384;
+    private static final int BOUNCES_PER_RAY = 512;
+    //private static final int SAMPLES_PER_PIXEL = 256;
+    //private static final int BOUNCES_PER_RAY = 64;
 
     //private static final Vec3 camPos = new Vec3(13.0f, 2.0f, 3.0f);
     //private static final Vec3 camFor = VectorOperations.normalise(new Vec3(-13.0f, -2.0f, -3.0f));
